@@ -1,0 +1,90 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Test Case 1 [80, 120]
+      id: test-case-1-80-120
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test Case 1 [80, 120]
+        setup-command: ''
+        command: python3 firewall_traffic_analyzer.py
+        input: |-
+          80
+          120
+        expected-output: "=== Network Traffic Security Analyzer ===\n\nEnter the port
+          number (e.g., 80, 22, 443, 3389): Enter the data transfer size in megabytes
+          (MB): \nFIREWALL LOG:\nPort: 80, Transfer Size: 120 MB\nRisk Assessment:
+          MEDIUM RISK: Large unencrypted data transfer detected.\n------------------------"
+        comparison-method: exact
+        timeout: 10
+        max-score: 10
+    - name: Test Case 2 [22, 12]
+      id: test-case-2-22-12
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test Case 2 [22, 12]
+        setup-command: ''
+        command: python3 firewall_traffic_analyzer.py
+        input: |-
+          22
+          12
+        expected-output: "=== Network Traffic Security Analyzer ===\n\nEnter the port
+          number (e.g., 80, 22, 443, 3389): Enter the data transfer size in megabytes
+          (MB): \nFIREWALL LOG:\nPort: 22, Transfer Size: 12 MB\nRisk Assessment:
+          HIGH RISK: Potential unauthorized remote access detected!\n------------------------"
+        comparison-method: exact
+        timeout: 10
+        max-score: 10
+    - name: Test Case 3 [443, 1024]
+      id: test-case-3-443-1024
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test Case 3 [443, 1024]
+        setup-command: ''
+        command: python3 firewall_traffic_analyzer.py
+        input: 443, 1024
+        expected-output: "=== Network Traffic Security Analyzer ===\n\nEnter the port
+          number (e.g., 80, 22, 443, 3389): Enter the data transfer size in megabytes
+          (MB): \nFIREWALL LOG:\nPort: 443, Transfer Size: 1024 MB\nRisk Assessment:
+          LOW RISK: Secure encrypted transfer detected.\n------------------------"
+        comparison-method: exact
+        timeout: 10
+        max-score: 10
+    - name: Test Case 4 [1725, 234567]
+      id: test-case-4-1725-234567
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Test Case 4 [1725, 234567]
+        setup-command: ''
+        command: python3 firewall_traffic_analyzer.py
+        input: |-
+          1725
+          234567
+        expected-output: "=== Network Traffic Security Analyzer ===\n\nEnter the port
+          number (e.g., 80, 22, 443, 3389): Enter the data transfer size in megabytes
+          (MB): \nFIREWALL LOG:\nPort: 1725, Transfer Size: 234567 MB\nRisk Assessment:
+          UNKNOWN: Unrecognized traffic pattern.\n------------------------"
+        comparison-method: exact
+        timeout: 10
+        max-score: 10
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        TEST-CASE-1-80-120_RESULTS: "${{steps.test-case-1-80-120.outputs.result}}"
+        TEST-CASE-2-22-12_RESULTS: "${{steps.test-case-2-22-12.outputs.result}}"
+        TEST-CASE-3-443-1024_RESULTS: "${{steps.test-case-3-443-1024.outputs.result}}"
+        TEST-CASE-4-1725-234567_RESULTS: "${{steps.test-case-4-1725-234567.outputs.result}}"
+      with:
+        runners: test-case-1-80-120,test-case-2-22-12,test-case-3-443-1024,test-case-4-1725-234567
